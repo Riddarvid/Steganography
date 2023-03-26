@@ -1,4 +1,4 @@
-module Steganography.EOF (encode, decode) where
+module Steganography.JPG.EOI (encode, decode) where
 
 import Utils (bytesToInteger, integerToBytes)
 import Data.ByteString (ByteString)

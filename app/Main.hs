@@ -2,7 +2,7 @@ module Main (main) where
 
 import qualified Data.ByteString as BS
 import System.FilePath ((</>))
-import Steganography.EOF (encode, decode)
+import Steganography.JPG.EOI (encode, decode)
 
 inputDir :: FilePath
 inputDir = "/home/riddarvid/steg/stegInput"
@@ -24,9 +24,17 @@ outputFile = outputDir </> "decoded.txt"
 
 main :: IO ()
 main = do
+  mainEncode
+  mainDecode
+
+mainEncode :: IO ()
+mainEncode = do
   coverBytes <- BS.readFile coverFile
   msgBytes <- BS.readFile msgFile
   let stegoBytes = encode coverBytes msgBytes
   BS.writeFile stegoFile stegoBytes
+
+mainDecode :: IO ()
+mainDecode = do
   decoded <- decode stegoFile
   BS.writeFile outputFile decoded
