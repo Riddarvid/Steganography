@@ -1,0 +1,8 @@
+Pick any file. Read it into a bytestream. Might be an issue if file is too big,
+since I don't know if ByteString does any buffering. Will look at in the future,
+for now simply read the entire file.
+
+To start with, let's simply try to read a file and write it into the same directory that we
+read it from.
+
+Seems like I should use lazy bytestrings if possible.
