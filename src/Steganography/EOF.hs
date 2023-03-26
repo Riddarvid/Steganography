@@ -1,29 +1,34 @@
-module Steganography.EOF (encode) where
+module Steganography.EOF (encode, decode) where
 
-import Utils (bytesToInteger)
+import Utils (bytesToInteger, integerToBytes)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
-import System.IO (Handle, hSeek, SeekMode (SeekFromEnd))
+import System.IO (Handle, hSeek, SeekMode (SeekFromEnd), withFile, IOMode (ReadMode))
+
+metaLength :: Int
+metaLength = 4
+
+-- Encoding
 
 encode :: ByteString -> ByteString -> ByteString
-encode = BS.append
-
--- Drop bytes until you find the marker byte (0xFF)
--- If the next byte is the EOI specifier (0xD9), simply return the rest of the string
--- Otherwise, keep searching for the next marker byte.
--- Works in theory but not in practice. Reading the file from start to end is
--- very slow. Solution: Let the last bytes represent the size of the message
--- We can then seek to that position using some of the functions in System.IO for
--- a more efficient search.
-decode :: ByteString -> ByteString
-decode stego
-  | BS.head stego' == 0xD9 = BS.tail stego'
-  | otherwise = decode stego'
+encode cover msg = cover `BS.append` msg `BS.append` msgLength
   where
-    stego' = BS.dropWhileEnd (/= 0xFF) stego
+    msgLength = integerToBytes (toInteger $ BS.length msg) metaLength
 
-msgLength :: Handle -> IO Integer
-msgLength hdl = do
-  hSeek hdl SeekFromEnd (-4)
+-- Decoding
+
+decode :: FilePath -> IO ByteString
+decode stegoPath = do
+  msgLength <- withFile stegoPath ReadMode getMsgLength
+  withFile stegoPath ReadMode (getMsg msgLength)
+
+getMsgLength :: Handle -> IO Int
+getMsgLength hdl = do
+  hSeek hdl SeekFromEnd (negate $ toInteger metaLength)
   lengthBytes <- BS.hGetContents hdl
-  return $ bytesToInteger lengthBytes
+  return $ fromInteger $ bytesToInteger lengthBytes
+
+getMsg :: Int -> Handle -> IO ByteString
+getMsg msgLength hdl = do
+  hSeek hdl SeekFromEnd (negate $ toInteger (msgLength + metaLength))
+  BS.hGet hdl msgLength
