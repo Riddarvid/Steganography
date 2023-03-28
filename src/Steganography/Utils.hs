@@ -1,4 +1,4 @@
-module Utils (
+module Steganography.Utils (
   bytesToInteger,
   integerToBytes
 ) where

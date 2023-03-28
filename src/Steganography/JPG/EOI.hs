@@ -1,6 +1,8 @@
 module Steganography.JPG.EOI (encode, decode) where
+-- This module encodes and decodes messages in image formats that have an explicit
+-- End Of Image (EOI) marker. 
 
-import Utils (bytesToInteger, integerToBytes)
+import Steganography.Utils (bytesToInteger, integerToBytes)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
 import System.IO (Handle, hSeek, SeekMode (SeekFromEnd), withFile, IOMode (ReadMode))
